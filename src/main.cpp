@@ -21,18 +21,20 @@
  * You can file issues at https://github.com/fjulian79/smartsink
  */
 
-#include <bsp/bsp.h>
-#include <bsp/bsp_gpio.h>
+#include "bsp/bsp.h"
+#include "bsp/bsp_gpio.h"
 #include "bsp/bsp_tty.h"
 #include "bsp/bsp_flash.h"
+#include "bsp/bsp_adc.h"
 
 #include "cli/cli.h"
 #include "generic/generic.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <stdint.h>
 
-#define VERSIONSTRING       "rel_1_0_0"
+#define VERSIONSTRING       "rel_1_1_0"
 
 Cli cli;
 
@@ -58,7 +60,7 @@ int8_t cmd_ver(char *argv[], uint8_t argc)
 }
 
 /**
- * @brief Tp print the help text
+ * @brief To print the help text
  * 
  * @param args      The argument list
  * @return          0
@@ -70,7 +72,54 @@ int8_t cmd_help(char *argv[], uint8_t argc)
 
     printf("Supported commands:\n");
     printf("  ver               Used to print version and licence infos.\n");
+    printf("  test              Uesd to test the ADC during developement.\n");
     printf("  help              Prints this text.\n");
+
+    return 0;
+}
+
+/**
+ * @brief Used for ADC Tests
+ * 
+ * @param args      The argument list
+ * @return          0
+ */
+int8_t cmd_test(char *argv[], uint8_t argc)
+{
+    uint32_t data[BSP_ADC_LIPOCELLS];
+    uint32_t samples = 0;
+    uint8_t cells = 0;
+	unused(argv);
+    unused(argc);
+
+    memset(data, 0, sizeof(data));
+    samples = bspAdcGetResult(&data[0]);
+
+    for (cells = BSP_ADC_LIPOCELLS; cells > 0; cells--)
+    {
+        if(data[cells-1] > 50)
+            break;
+    }
+
+    printf("Cells: %d, Samples: %lu\n", cells, samples);
+
+    if (cells == 0)
+        return 0;
+
+    for (uint8_t cell = BSP_ADC_LIPOCELLS-1 ; cell > 0; cell--)
+    {
+        if (cell >= cells)
+        {
+            data[cell] = 0;
+        }
+        else
+        {
+            data[cell] -= data[cell-1];
+        }
+    }
+
+    printf("%lu, %lu, %lu, %lu, %lu, %lu \n", 
+        data[0], data[1], data[2], data[3], data[4], data[5]);
 
     return 0;
 }
@@ -78,6 +127,7 @@ int8_t cmd_help(char *argv[], uint8_t argc)
 cliCmd_t cmd_table[] =
 {
    {"ver", cmd_ver},
+   {"test", cmd_test},
    {"help", cmd_help},
    {0,      0}
 };
@@ -112,7 +162,7 @@ int main(void)
 
         if (sysTick - ledTick >= 250)
         {
-            ledTick= sysTick;
+            ledTick = sysTick;
             bspGpioToggle(BSP_GPIO_LED);
         }
 

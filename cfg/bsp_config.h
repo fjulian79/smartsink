@@ -83,12 +83,18 @@
 #define BSP_TTY_BLOCKING                BSP_ENABLED
 
 /**
+ * The default number of Systicks which will be used as oversampling duration.
+ */
+#define BSP_ADC_SAMPLETICKS_DEFAULT     100
+
+/**
  * Interrupt priority configuration.
  *
  * See bsp.h for min max vaules and how they should be interpreted.
  */
 #define BSP_SYSTICK_IRQ_PRIO            BSP_IRQPRIO_MAX
 #define BSP_TTY_USART_IRQ_PRIO          (BSP_IRQPRIO_MAX + 1)
+
 /**
  * GPIO definitions.
  *
