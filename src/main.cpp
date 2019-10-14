@@ -34,15 +34,17 @@
 #include <string.h>
 #include <stdint.h>
 
-#define VERSIONSTRING       "rel_1_1_0"
+#define VERSIONSTRING       "rel_1_2_0"
 
 Cli cli;
 
 /**
  * @brief Prints the version inforamtion
  * 
- * @param args      The arguemnt list
- * @return          0
+ * @param argv No arguments used
+ * @param argc NO arguments used 
+ * 
+ * @return int8_t zero
  */
 int8_t cmd_ver(char *argv[], uint8_t argc)
 {
@@ -60,31 +62,14 @@ int8_t cmd_ver(char *argv[], uint8_t argc)
 }
 
 /**
- * @brief To print the help text
+ * @brief Used to provide infos on the lipo cells
  * 
- * @param args      The argument list
- * @return          0
- */
-int8_t cmd_help(char *argv[], uint8_t argc)
-{
-	unused(argv);
-    unused(argc);
-
-    printf("Supported commands:\n");
-    printf("  ver               Used to print version and licence infos.\n");
-    printf("  test              Uesd to test the ADC during developement.\n");
-    printf("  help              Prints this text.\n");
-
-    return 0;
-}
-
-/**
- * @brief Used for ADC Tests
+ * @param argv 
+ * @param argc 
  * 
- * @param args      The argument list
- * @return          0
+ * @return int8_t 
  */
-int8_t cmd_test(char *argv[], uint8_t argc)
+int8_t cmd_cells(char *argv[], uint8_t argc)
 {
     uint32_t data[BSP_ADC_LIPOCELLS];
     uint32_t samples = 0;
@@ -124,10 +109,114 @@ int8_t cmd_test(char *argv[], uint8_t argc)
     return 0;
 }
 
+/**
+ * @brief Used to provide infos on battery current.
+ * 
+ * @param argv 
+ * @param argc 
+ * 
+ * @return int8_t 
+ */
+int8_t cmd_cur(char *argv[], uint8_t argc)
+{
+	unused(argv);
+    unused(argc);
+
+	printf("cur, NOT implmented yet!\n");
+
+    return 0;
+}
+
+/**
+ * @brief Used to provide infos on the battery temerature.
+ * 
+ * @param argv 
+ * @param argc
+ *  
+ * @return int8_t 
+ */
+int8_t cmd_tmp(char *argv[], uint8_t argc)
+{
+	unused(argv);
+    unused(argc);
+
+	printf("tmp, NOT implmented yet!\n");
+
+    return 0;
+}
+
+/**
+ * @brief Used to start the periodic data collection and output.
+ * 
+ * @param argv 
+ * @param argc 
+ * 
+ * @return int8_t 
+ */
+int8_t cmd_mon(char *argv[], uint8_t argc)
+{
+	unused(argv);
+    unused(argc);
+
+	printf("mon, NOT implmented yet!\n");
+
+    return 0;
+}
+
+/**
+ * @brief Used to test the on board alarm buzzer. 
+ * 
+ * @param argv 
+ * @param argc 
+ * 
+ * @return int8_t 
+ */
+int8_t cmd_beep(char *argv[], uint8_t argc)
+{
+	unused(argv);
+    unused(argc);
+
+	printf("beep, NOT implmented yet!\n");
+
+    return 0;
+}
+
+/**
+ * @brief Used to print the help text.
+ * 
+ * @param argv 
+ * @param argc 
+ * 
+ * @return int8_t 
+ */
+int8_t cmd_help(char *argv[], uint8_t argc)
+{
+	unused(argv);
+    unused(argc);
+
+    printf("Supported commands:\n");
+    printf("  ver               Prints version and licence infos.\n");
+    printf("  cells [a|r]       Provides the actual cell voltages.\n");
+    printf("                    a .. Absolute volatges to GND.\n");
+    printf("                    r .. Individual cell voltages (Default).\n");
+    printf("  cur               Provides the actual current.\n");
+    printf("  tmp               Provides the actual temperature.\n");
+    printf("  mon [ms]          Start monitoring all observed values.\n");
+    printf("                    ms .. data period in ms. Defaults to 100ms.\n");
+    printf("  beep              Used to test the alarm buzzer.\n");
+    printf("  help              Prints this text.\n");
+
+    return 0;
+}
+
 cliCmd_t cmd_table[] =
 {
    {"ver", cmd_ver},
-   {"test", cmd_test},
+   {"cells", cmd_cells},
+   {"cur", cmd_cur},
+   {"tmp", cmd_tmp},
+   {"mon", cmd_mon},
+   {"beep", cmd_beep},
    {"help", cmd_help},
    {0,      0}
 };
