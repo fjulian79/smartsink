@@ -12,8 +12,10 @@
 
 #define DEFAULT_GATETIME    250
 
-Battery::Battery() : 
-      GateTime(DEFAULT_GATETIME)
+Battery::Battery(BatteryParams_t *_pParam) : 
+      pParam(_pParam)
+    , CellScaleDen(11)
+    , GateTime(DEFAULT_GATETIME)
     , LastTick(0)
     , SampleCnt(0)
     , Samples(0)
@@ -33,8 +35,10 @@ void Battery::setGateTime(uint16_t millis)
     GateTime = millis;
 }
 
-void Battery::update(uint32_t millis)
+bool Battery::update(uint32_t millis)
 {
+    bool newData = false;
+
     SampleCnt++;
 
     for (size_t i = 0; i < BATTERY_NUMCELLS; i++)
@@ -46,7 +50,10 @@ void Battery::update(uint32_t millis)
     {
         LastTick = millis;
         updateCells();
+        newData = true;
     }
+
+    return newData;
 }
 
 uint32_t Battery::getCell(uint8_t cell, bool abs)
@@ -67,11 +74,6 @@ uint32_t Battery::getCell(uint8_t cell, bool abs)
     }
 
     return volt;
-}
-
-uint16_t Battery::getSamples(void)
-{
-    return Samples;
 }
 
 int8_t Battery::getNumCells(void)
@@ -123,6 +125,16 @@ uint32_t Battery::getMinCell(void)
     return volt;
 }
 
+uint16_t Battery::getSamples(void)
+{
+    return Samples;
+}
+
+uint32_t Battery::getVref(void)
+{
+    return VRefAdc;
+}
+
 uint32_t Battery::calibrate(uint8_t cell, uint32_t voltage)
 {
     updateVref();
@@ -143,9 +155,9 @@ uint32_t Battery::calibrate(uint8_t cell, uint32_t voltage)
     printf("raw: %lu, samples: %lu\n", Raw[cell], SampleCnt);
     Raw[cell] = __LL_ADC_CALC_DATA_TO_VOLTAGE(
                 VRefAdc, Raw[cell], LL_ADC_RESOLUTION_12B);
-    printf("Scale old: %lu\n", CellScaleNum[cell]); 
-    CellScaleNum[cell] = voltage/Raw[cell];
-    printf("Scale new: %lu\n", CellScaleNum[cell]); 
+    printf("Scale old: %lu\n", pParam->CellScale[cell]); 
+    pParam->CellScale[cell] = voltage/Raw[cell];
+    printf("Scale new: %lu\n", pParam->CellScale[cell]); 
 
     memset(Raw, 0, sizeof(Raw));
     SampleCnt = 0;
@@ -169,7 +181,7 @@ void Battery::updateCells(void)
         Raw[i] /= SampleCnt;
         VCell[i] = __LL_ADC_CALC_DATA_TO_VOLTAGE(
                 VRefAdc, Raw[i], LL_ADC_RESOLUTION_12B);
-        VCell[i] = (VCell[i] * CellScaleNum[i]) >> CellScaleDen; 
+        VCell[i] = (VCell[i] * pParam->CellScale[i]) >> CellScaleDen; 
         Raw[i] = 0;
     }
 
